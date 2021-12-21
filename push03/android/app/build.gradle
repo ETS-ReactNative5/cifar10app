@@ -186,6 +186,9 @@ android {
 
         }
     }
+    aaptOptions {
+        noCompress 'tflite'
+    }
 }
 
 dependencies {
@@ -215,6 +218,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+    compile project(':tflite-react-native')
+
 }
 
 // Run this once to be able to run the application with BUCK

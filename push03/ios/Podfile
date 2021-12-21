@@ -12,6 +12,10 @@ target 'push03' do
     :hermes_enabled => false
   )
 
+  pod 'react-native-cameraroll', :path => '../node_modules/@react-native-community/cameraroll'
+
+  pod 'TfliteReactNative', :path => '../node_modules/tflite-react-native'
+
   target 'push03Tests' do
     inherit! :complete
     # Pods for testing
