@@ -17,11 +17,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
-  View,
+  Platform, View,
   Image,
 } from 'react-native';
-
+import Cifar from './cifar_test_data/cifar';
 import ImagePicker from 'react-native-image-picker'
 import Tflite from 'tflite-react-native'
 
@@ -29,46 +28,48 @@ let tflite = new Tflite()
 var modelFile = 'models/CIFAR10_model.tflite'
 var labelsFile = 'models/CIFAR_labels.txt'
 
-const App: () => Node = () => {
+function App() {
   const [recognition, setRecognition] = useState(null)
-  const [source, setSource] = useState(null)
+  const [source, setSource] = useState()
+  const [input, setInput] = useState()
 
+  function runModel(path) {
+    tflite.runModelOnImage(
+      {path: path}, (err, ress) => {
+        if (err) console.log(err);
+        else {
+          console.log(ress);
+          setRecognition(ress[0]);
+        }
+      });
+  }
   function selectGallaryImage() {
-    const options = {}
+    const options = {};
     ImagePicker.launchImageLibrary(options, res => {
-      if (res.didCancel) console.log('caneled')
-      else if (res.error) console.log('error')
-      else if (res.customButton) console.log('custom butt')
+      if (res.didCancel) console.log('caneled');
+      else if (res.error) console.log('error');
+      else if (res.customButton) console.log('custom butt');
       else {
-        console.log('Libaray open')
-        // console.log(res)
-        setSource(res.uri)
-
-        tflite.runModelOnImage({
-          path: res.path,
-        }, (err, ress) => {
-          if (err) console.log(err)
-          else {
-            console.log(ress)
-            setRecognition(ress[0])
-          }
-        })
+        console.log('Libaray open');
+        var path = Platform.OS === 'ios' ? res.uri : 'file://' + res.path;
+        setSource(path);
+        console.log(path)
+        runModel(path)
       }
-    })
+    });
   }
 
   useEffect(() => {
-    console.log('useing tflite load model')
+    console.log('using tflite load model');
     tflite.loadModel(
-      {
-        model: modelFile,
-        labels: labelsFile
-      }, (err, res) => {
-        if (err) console.log(err)
-        else console.log(res)
-      },
-    );
-  }, [])
+      {model: modelFile, labels: labelsFile},
+      (err, res) => {
+        if (err) console.log(err);
+        else console.log(res);
+      });
+  }, []);
+
+  const AIR_PATH = './cifar_test_data/airplane1.png'
 
 
   return (
@@ -78,20 +79,26 @@ const App: () => Node = () => {
       <TouchableOpacity style={styles.button} onPress={() => selectGallaryImage()}>
         <Text style={styles.WT}>Camera Roll</Text>
       </TouchableOpacity>
+
+      <Cifar setImage={item => setInput(item)} />
+      <TouchableOpacity style={styles.button} onPress={() => runModel('file://./cifar_test_data/airplane1.png')}>
+        <Text style={styles.WT}>from internet</Text>
+      </TouchableOpacity>
       {
-        recognition ? <View>
-          <Image source={source} />
-          <Text style={styles.text}>{recognition['label'] + ' - ' + (recognition['confidence'] * 100).toFixed(0) + '%'}</Text>
-        </View> : null
+        recognition ?
+          <View>
+            <Image source={source}></Image>
+            <Text style={styles.text}>{recognition['label'] + ' - ' + (recognition['confidence'] * 100).toFixed(0) + '%'}</Text>
+          </View> : null
       }
 
-    </View>
+    </View >
   );
 };
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: '#888',
+    backgroundColor: '#981',
     padding: 15,
     justifyContent: 'center',
     alignSelf: 'center',
