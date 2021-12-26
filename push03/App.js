@@ -1,21 +1,16 @@
 /* eslint-disable prettier/prettier */
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
+ * This App is for academic purpose only.
+ * Created by Ben Sagir.
+ * in this app there will be a predict from a neoral network that happends localy on the device.
+ * the net was train on Google Colab.
+ * the net is MobileNetV2.
+ * train accuracy achived: 98%
+ * validation accuracy achived: 87%
  */
 
 import React, {useState, useEffect} from 'react';
-import {
-  Dimensions,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Platform, View,
-  Image,
-} from 'react-native';
+import {Dimensions, StyleSheet, Text, TouchableOpacity, Platform, View, Image} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import ImagePicker from 'react-native-image-picker';
 import Tflite from 'tflite-react-native';
@@ -68,31 +63,49 @@ function App() {
 
 
   return (
-    <LinearGradient colors={['rgba(255, 255, 255, 0)', 'rgba(0, 0, 0, 0.8)']} style={styles.main}>
-      <LinearGradient colors={['rgba(0,0,0, 0.6)', 'rgba(255, 255, 255, 0)']} style={styles.header}>
-        <Text style={[styles.text, {fontSize: 24, color: '#fff'}]}>CIFAR10 Application</Text>
-        <Text style={styles.text}>This is an a presentetion of prediction of neural network that was train on CIFAR10 dataset</Text>
-
+    <LinearGradient colors={['#5829A7', '#3D0E61']} style={styles.main}>
+      <LinearGradient colors={['#93CAF6', '#97DFFC']} style={styles.header}>
+        <Text style={styles.headText}>CIFAR10 Application</Text>
+        <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on CIFAR10 dataset</Text>
       </LinearGradient>
 
-
-      <TouchableOpacity style={styles.button} onPress={() => selectGallaryImage()}>
-        <Text style={styles.WT}>Camera Roll</Text>
+      <TouchableOpacity onPress={() => selectGallaryImage()}>
+        <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+          <Text style={styles.WT}>Camera Roll</Text>
+        </LinearGradient>
       </TouchableOpacity>
-
 
       {
         recognition ?
           <View>
-            <Image source={source} />
+            {/* <Image source={source} /> */}
             {recognition.length === 1 ?
-              <Text style={[styles.text, {fontSize: 24, color: '#fff'}]}>first peak: {recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+              <View style={styles.reconV}>
+                <Text style={styles.text}>first peak:</Text>
+                <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+              </View>
               :
-              <Text>sec</Text>
+              <View>
+                <View style={styles.reconV}>
+                  <Text style={styles.text}>1st peak:</Text>
+                  <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+                </View>
+                {recognition[1] ?
+                  <View style={styles.reconV}>
+                    <Text style={styles.text}>2nd peak:</Text>
+                    <Text style={styles.reconText}>{recognition[1].label + ' - ' + (recognition[1].confidence * 100).toFixed(0) + '%'}</Text>
+                  </View>
+                  : <View />}
+                {recognition[2] ?
+                  <View style={styles.reconV}>
+                    <Text style={styles.text}>3rd peak:</Text>
+                    <Text style={styles.reconText}>{recognition[2].label + ' - ' + (recognition[2].confidence * 100).toFixed(0) + '%'}</Text>
+                  </View>
+                  : <View />}
+              </View>
             }
           </View> : <View />
       }
-
     </LinearGradient >
   );
 }
@@ -109,27 +122,66 @@ const styles = StyleSheet.create({
   },
   header: {
     height: Dimensions.get('screen').height * 25 / 100,
-    backgroundColor: '#ef6',
     padding: 10,
     position: 'absolute',
     top: 0,
     width: Dimensions.get('screen').width,
     borderBottomWidth: 3,
-    borderBottomColor: '#444'
+    borderBottomColor: '#444',
   },
   button: {
-    backgroundColor: '#5dd',
-    borderWidth: 5,
-    padding: 30,
+    borderWidth: 3,
+    paddingHorizontal: 45,
+    paddingVertical: 25,
     alignItems: 'center',
     borderRadius: 15,
+    borderColor: '#461177',
+    shadowColor: '#3D0E61',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
   },
   WT: {
-    color: '#fff',
+    color: '#4E148C',
     fontSize: 23,
+    fontWeight: 'bold',
   },
-  text: {fontSize: 16, fontWeight: 'bold', margin: 10, padding: 10},
-
+  reconV: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reconText: {
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+    fontSize: 24,
+    color: '#fff',
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+    color: '#fff',
+  },
+  headText: {
+    fontSize: 24,
+    color: '#3D0E61',
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+  },
+  headSmallText: {
+    fontSize: 16,
+    color: '#3D0E61',
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+  },
 });
 
 export default App;
