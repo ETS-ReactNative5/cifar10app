@@ -81,7 +81,7 @@ function App() {
             {/* <Image source={source} /> */}
             {recognition.length === 1 ?
               <View style={styles.reconV}>
-                <Text style={styles.text}>first peak:</Text>
+                {/* <Text style={styles.text}>first peak:</Text> */}
                 <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
               </View>
               :
