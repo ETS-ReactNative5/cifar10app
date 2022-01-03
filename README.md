@@ -1,4 +1,4 @@
-# cifar10app
+# CIFAR10 Application
 
  * This App is for academic purpose only.
  * Created by Ben Sagir.
