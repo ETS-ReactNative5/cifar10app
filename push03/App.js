@@ -1,141 +1,187 @@
+/* eslint-disable prettier/prettier */
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
+ * This App is for academic purpose only.
+ * Created by Ben Sagir.
+ * in this app there will be a predict from a neoral network that happends localy on the device.
+ * the net was train on Google Colab.
+ * the net is MobileNetV2.
+ * train accuracy achived: 98%
+ * validation accuracy achived: 87%
  */
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Dimensions, StyleSheet, Text, TouchableOpacity, Platform, View, Image} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import ImagePicker from 'react-native-image-picker';
+import Tflite from 'tflite-react-native';
 
-import PushNotification from 'react-native-push-notification';
+let tflite = new Tflite();
+var modelFile = 'models/CIFAR10_model.tflite';
+var labelsFile = 'models/CIFAR_labels.txt';
 
-const App: () => Node = () => {
-  PushNotification.setApplicationIconBadgeNumber(0)
-  function clicker() {
-    console.log('in clicker function')
-    PushNotification.localNotificationSchedule({
-      date: new Date(Date.now() + 5 * 1000), // in 30 secs
+function App() {
+  const [recognition, setRecognition] = useState(null);
+  const [source, setSource] = useState();
 
-      largeIcon: 'ic_launcher', // (optional) default: "ic_launcher"
-      smallIcon: 'ic_notification', // (optional) default: "ic_notification" with fallback for "ic_launcher"
-      vibrate: true, // (optional) default: true
-      vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000       
-
-      /* iOS and Android properties */
-      title: 'iGAM - Your Personal Dentist', // (optional)
-      message: "message", // (required)
-      userInfo: {sceen: "home"}, // (optional) default: {} (using null throws a JSON value '<null>' error)
-      number: 1, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
-
+  function runModel(path) {
+    tflite.runModelOnImage(
+      {path: path}, (err, ress) => {
+        if (err) {console.log(err);}
+        else {
+          console.log(ress);
+          setRecognition(ress);
+        }
+      });
+  }
+  function selectGallaryImage() {
+    const options = {};
+    ImagePicker.launchImageLibrary(options, res => {
+      if (res.didCancel) {console.log('caneled');}
+      else if (res.error) {console.log('error');}
+      else if (res.customButton) {console.log('custom butt');}
+      else {
+        console.log('Libaray open');
+        var path = Platform.OS === 'ios' ? res.uri : 'file://' + res.path;
+        setSource(path);
+        console.log('path is : ' + path);
+        runModel(path);
+      }
     });
   }
 
-  function creactMultNoti() {
-    let time = []
-    for (let i = 0; i < 3; i++) {
-      time[i] = new Date(Date.now() + 5 * i * 1000) //every 5 seconds
-
-
-      PushNotification.localNotificationSchedule({
-        date: time[i], // in 30 secs
-
-        /* Android Only Properties */
-        //  channelId: soundName ? 'sound-channel-id' : 'default-channel-id',
-        ticker: 'My Notification Ticker', // (optional)
-        autoCancel: true, // (optional) default: true
-        largeIcon: 'ic_launcher', // (optional) default: "ic_launcher"
-        smallIcon: 'ic_notification', // (optional) default: "ic_notification" with fallback for "ic_launcher"
-        bigText: 'My <strong>big text</strong> that will be shown when notification is expanded', // (optional) default: "message" prop
-        subText: 'This is a subText', // (optional) default: none
-        color: 'blue', // (optional) default: system default
-        vibrate: true, // (optional) default: true
-        vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
-        tag: 'some_tag', // (optional) add tag to message
-        group: 'group', // (optional) add group to message
-        groupSummary: false, // (optional) set this notification to be the group summary for a group of notifications, default: false
-        ongoing: false, // (optional) set whether this is an "ongoing" notification
-        actions: ['Yes', 'No'], // (Android only) See the doc for notification actions to know more
-        invokeApp: false, // (optional) This enable click on actions to bring back the application to foreground or stay in background, default: true
-
-        when: null, // (optionnal) Add a timestamp pertaining to the notification (usually the time the event occurred). For apps targeting Build.VERSION_CODES.N and above, this time is not shown anymore by default and must be opted into by using `showWhen`, default: null.
-        usesChronometer: false, // (optional) Show the `when` field as a stopwatch. Instead of presenting `when` as a timestamp, the notification will show an automatically updating display of the minutes and seconds since when. Useful when showing an elapsed time (like an ongoing phone call), default: false.
-        timeoutAfter: null, // (optional) Specifies a duration in milliseconds after which this notification should be canceled, if it is not already canceled, default: null
-
-        /* iOS only properties */
-        category: '', // (optional) default: empty string
-
-        /* iOS and Android properties */
-        // id: this.lastId, // (optional) Valid unique 32 bit integer specified as string. default: Autogenerated Unique ID
-        title: 'Scheduled Notification', // (optional)
-        message: 'My Notification Message', // (required)
-        userInfo: {sceen: "home"}, // (optional) default: {} (using null throws a JSON value '<null>' error)
-        // playSound: !!soundName, // (optional) default: true
-        // soundName: soundName ? soundName : 'default', // (optional) Sound to play when the notification is shown. Value of 'default' plays the default sound. It can be set to a custom sound such as 'android.resource://com.xyz/raw/my_sound'. It will look for the 'my_sound' audio file in 'res/raw' directory and play it. default: 'default' (default sound is played)
-        number: 1, // (optional) Valid 32 bit integer specified as string. default: none (Cannot be zero)
+  useEffect(() => {
+    console.log('using tflite load model');
+    tflite.loadModel(
+      {model: modelFile, labels: labelsFile},
+      (err, res) => {
+        if (err) {console.log(err);}
+        else {console.log('useEffect respose: ' + res);}
       });
-    }
-  }
+  }, []);
+
+
+
+
   return (
-    <View style={styles.main}>
-      <TouchableOpacity style={styles.button} onPress={() => {clicker()}}>
-        <Text style={styles.WT}>Press to notifi 30sec from now</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => {creactMultNoti()}}>
-        <Text style={styles.WT}>Press to notifi 3 in a row</Text>
+    <LinearGradient colors={['#5829A7', '#3D0E61']} style={styles.main}>
+      <LinearGradient colors={['#93CAF6', '#97DFFC']} style={styles.header}>
+        <Text style={styles.headText}>CIFAR10 Application</Text>
+        <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on CIFAR10 dataset</Text>
+      </LinearGradient>
+
+      <TouchableOpacity onPress={() => selectGallaryImage()}>
+        <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+          <Text style={styles.WT}>Camera Roll</Text>
+        </LinearGradient>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => {
-        PushNotification.getScheduledLocalNotifications(
-          list => console.log(list)
-        )
-      }}>
-        <Text style={styles.WT}>display the schedualed notification</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={() => {PushNotification.removeAllDeliveredNotifications();}}>
-        <Text style={styles.WT}>clears the notification center</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={PushNotification.cancelAllLocalNotifications()}>
-        <Text style={styles.WT}>cancel all notifications</Text>
-      </TouchableOpacity>
-
-
-    </View>
+      {
+        recognition ?
+          <View>
+            {/* <Image source={source} /> */}
+            {recognition.length === 1 ?
+              <View style={styles.reconV}>
+                {/* <Text style={styles.text}>first peak:</Text> */}
+                <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+              </View>
+              :
+              <View>
+                <View style={styles.reconV}>
+                  <Text style={styles.text}>1st peak:</Text>
+                  <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+                </View>
+                {recognition[1] ?
+                  <View style={styles.reconV}>
+                    <Text style={styles.text}>2nd peak:</Text>
+                    <Text style={styles.reconText}>{recognition[1].label + ' - ' + (recognition[1].confidence * 100).toFixed(0) + '%'}</Text>
+                  </View>
+                  : <View />}
+                {recognition[2] ?
+                  <View style={styles.reconV}>
+                    <Text style={styles.text}>3rd peak:</Text>
+                    <Text style={styles.reconText}>{recognition[2].label + ' - ' + (recognition[2].confidence * 100).toFixed(0) + '%'}</Text>
+                  </View>
+                  : <View />}
+              </View>
+            }
+          </View> : <View />
+      }
+    </LinearGradient >
   );
-};
+}
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: '#888',
+    backgroundColor: '#981',
     padding: 15,
     justifyContent: 'center',
     alignSelf: 'center',
+    alignItems: 'center',
     flex: 1,
+    width: Dimensions.get('screen').width,
+  },
+  header: {
+    height: Dimensions.get('screen').height * 25 / 100,
+    padding: 10,
+    position: 'absolute',
+    top: 0,
+    width: Dimensions.get('screen').width,
+    borderBottomWidth: 3,
+    borderBottomColor: '#444',
   },
   button: {
-    backgroundColor: '#aaa',
-    borderWidth: 5,
-    padding: 10,
+    borderWidth: 3,
+    paddingHorizontal: 45,
+    paddingVertical: 25,
     alignItems: 'center',
     borderRadius: 15,
+    borderColor: '#461177',
+    shadowColor: '#3D0E61',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+    elevation: 12,
   },
   WT: {
-    color: '#fff',
-    fontSize: 23
+    color: '#4E148C',
+    fontSize: 23,
+    fontWeight: 'bold',
   },
-
+  reconV: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reconText: {
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+    fontSize: 24,
+    color: '#fff',
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+    color: '#fff',
+  },
+  headText: {
+    fontSize: 24,
+    color: '#3D0E61',
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+  },
+  headSmallText: {
+    fontSize: 16,
+    color: '#3D0E61',
+    fontWeight: 'bold',
+    margin: 10,
+    padding: 10,
+  },
 });
 
 export default App;
