@@ -50,12 +50,11 @@ function App() {
   }
 
   useEffect(() => {
-    console.log('using tflite load model');
     tflite.loadModel(
       {model: modelFile, labels: labelsFile},
       (err, res) => {
         if (err) {console.log(err);}
-        else {console.log('useEffect respose: ' + res);}
+        else {console.log('useEffect tflite load model respose: ' + res);}
       });
   }, []);
 
@@ -68,20 +67,12 @@ function App() {
         <Text style={styles.headText}>CIFAR10 Application</Text>
         <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on CIFAR10 dataset</Text>
       </LinearGradient>
-
-      <TouchableOpacity onPress={() => selectGallaryImage()}>
-        <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
-          <Text style={styles.WT}>Camera Roll</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-
       {
         recognition ?
-          <View>
-            {/* <Image source={source} /> */}
+          <View style={styles.recognition}>
+            <Image source={{uri: source}} style={styles.img} />
             {recognition.length === 1 ?
               <View style={styles.reconV}>
-                {/* <Text style={styles.text}>first peak:</Text> */}
                 <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
               </View>
               :
@@ -106,6 +97,11 @@ function App() {
             }
           </View> : <View />
       }
+      <TouchableOpacity onPress={() => selectGallaryImage()}>
+        <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+          <Text style={styles.WT}>Camera Roll</Text>
+        </LinearGradient>
+      </TouchableOpacity>
     </LinearGradient >
   );
 }
@@ -121,13 +117,10 @@ const styles = StyleSheet.create({
     width: Dimensions.get('screen').width,
   },
   header: {
-    height: Dimensions.get('screen').height * 25 / 100,
     padding: 10,
     position: 'absolute',
     top: 0,
     width: Dimensions.get('screen').width,
-    borderBottomWidth: 3,
-    borderBottomColor: '#444',
   },
   button: {
     borderWidth: 3,
@@ -150,9 +143,30 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: 'bold',
   },
+  recognition: {
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  img: {
+    width: 180,
+    height: 180,
+    margin: 15,
+    borderRadius: 30,
+    borderWidth: 3,
+    padding: 0,
+    borderColor: '#461177',
+    shadowColor: '#3D0E61',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+  },
   reconV: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   reconText: {
     fontWeight: 'bold',
@@ -172,15 +186,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#3D0E61',
     fontWeight: 'bold',
-    margin: 10,
     padding: 10,
   },
   headSmallText: {
     fontSize: 16,
     color: '#3D0E61',
     fontWeight: 'bold',
-    margin: 10,
-    padding: 10,
+    padding: 8,
   },
 });
 
