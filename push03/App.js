@@ -2,11 +2,11 @@
 /**
  * This App is for academic purpose only.
  * Created by Ben Sagir.
- * in this app there will be a predict from a neoral network that happends localy on the device.
+ * in this app there will be a predict from a neural network that happends localy on the device.
  * the net was train on Google Colab.
- * the net is MobileNetV2.
+ * the net is DenseNet201.
  * train accuracy achived: 98%
- * validation accuracy achived: 87%
+ * validation accuracy achived: 90%
  */
 
 import React, {useState, useEffect} from 'react';
@@ -16,8 +16,8 @@ import ImagePicker from 'react-native-image-picker';
 import Tflite from 'tflite-react-native';
 
 let tflite = new Tflite();
-var modelFile = 'models/CIFAR10_model.tflite';
-var labelsFile = 'models/CIFAR_labels.txt';
+var modelFile = 'models/densenet201_model_run47.tflite';
+var labelsFile = 'models/gng_labels.txt';
 
 function App() {
   const [recognition, setRecognition] = useState(null);
@@ -48,13 +48,28 @@ function App() {
       }
     });
   }
+  function selectCamera() {
+    const options = {};
+    ImagePicker.launchCamera(options, res => {
+      if (res.didCancel) {console.log('caneled');}
+      else if (res.error) {console.log('error');}
+      else if (res.customButton) {console.log('custom butt');}
+      else {
+        console.log('Camera open');
+        var path = Platform.OS === 'ios' ? res.uri : 'file://' + res.path;
+        setSource(path);
+        console.log('path is : ' + path);
+        runModel(path);
+      }
+    });
+  }
 
   useEffect(() => {
     tflite.loadModel(
       {model: modelFile, labels: labelsFile},
       (err, res) => {
         if (err) {console.log(err);}
-        else {console.log('useEffect tflite load model respose: ' + res);}
+        else {console.log('useEffect load ' + modelFile + ' model respose: ' + res);}
       });
   }, []);
 
@@ -64,8 +79,8 @@ function App() {
   return (
     <LinearGradient colors={['#5829A7', '#3D0E61']} style={styles.main}>
       <LinearGradient colors={['#93CAF6', '#97DFFC']} style={styles.header}>
-        <Text style={styles.headText}>CIFAR10 Application</Text>
-        <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on CIFAR10 dataset</Text>
+        <Text style={styles.headText}>Gum - Not Gum Application</Text>
+        <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on GNG dataset</Text>
       </LinearGradient>
       {
         recognition ?
@@ -97,11 +112,18 @@ function App() {
             }
           </View> : <View />
       }
-      <TouchableOpacity onPress={() => selectGallaryImage()}>
-        <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
-          <Text style={styles.WT}>Camera Roll</Text>
-        </LinearGradient>
-      </TouchableOpacity>
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity onPress={() => selectGallaryImage()}>
+          <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+            <Text style={styles.WT}>Camera Roll</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => selectCamera()}>
+          <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+            <Text style={styles.WT}>Take a Photo</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
     </LinearGradient >
   );
 }
@@ -124,8 +146,10 @@ const styles = StyleSheet.create({
   },
   button: {
     borderWidth: 3,
-    paddingHorizontal: 45,
-    paddingVertical: 25,
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+    margin: 10,
+    // width: Dimensions.get('screen').width * 4 / 10,
     alignItems: 'center',
     borderRadius: 15,
     borderColor: '#461177',
@@ -140,8 +164,10 @@ const styles = StyleSheet.create({
   },
   WT: {
     color: '#4E148C',
-    fontSize: 23,
+    fontSize: 21,
     fontWeight: 'bold',
+    textAlign: 'center'
+
   },
   recognition: {
     justifyContent: 'center',
