@@ -77,11 +77,11 @@ function App() {
 
 
   return (
-    <LinearGradient colors={['#5829A7', '#3D0E61']} style={styles.main}>
-      <LinearGradient colors={['#93CAF6', '#97DFFC']} style={styles.header}>
+    <View style={styles.main}>
+      <View style={styles.header}>
         <Text style={styles.headText}>Gum - Not Gum Application</Text>
         <Text style={styles.headSmallText}>This is an a presentetion of prediction of neural network that was train on GNG dataset</Text>
-      </LinearGradient>
+      </View>
       {
         recognition ?
           <View style={styles.recognition}>
@@ -114,23 +114,23 @@ function App() {
       }
       <View style={{flexDirection: 'row'}}>
         <TouchableOpacity onPress={() => selectGallaryImage()}>
-          <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+          <View style={styles.button}>
             <Text style={styles.WT}>Camera Roll</Text>
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => selectCamera()}>
-          <LinearGradient colors={['#858AE3', '#97DFFC']} style={styles.button}>
+          <View style={styles.button}>
             <Text style={styles.WT}>Take a Photo</Text>
-          </LinearGradient>
+          </View>
         </TouchableOpacity>
       </View>
-    </LinearGradient >
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: '#981',
+    backgroundColor: '#F3F9FF',
     padding: 15,
     justifyContent: 'center',
     alignSelf: 'center',
@@ -143,30 +143,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     width: Dimensions.get('screen').width,
-  },
-  button: {
-    borderWidth: 3,
-    paddingHorizontal: 25,
-    paddingVertical: 20,
-    margin: 10,
-    // width: Dimensions.get('screen').width * 4 / 10,
-    alignItems: 'center',
-    borderRadius: 15,
-    borderColor: '#461177',
-    shadowColor: '#3D0E61',
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: 3,
     },
-    shadowOpacity: 0.37,
+    shadowOpacity: 0.1,
     shadowRadius: 7.49,
     elevation: 12,
   },
+  button: {
+    backgroundColor: '#56AAFF',
+    paddingHorizontal: 25,
+    paddingVertical: 12,
+    margin: 10,
+    alignItems: 'center',
+    borderRadius: 11,
+    shadowColor: '#229BD5',
+    shadowOffset: {
+      width: 9,
+      height: 11,
+    },
+    shadowOpacity: 0.43,
+    shadowRadius: 16,
+    elevation: 12,
+  },
   WT: {
-    color: '#4E148C',
+    color: '#FFF',
     fontSize: 21,
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontFamily: 'Helvetica',
 
   },
   recognition: {
@@ -177,8 +187,7 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     margin: 15,
-    borderRadius: 30,
-    borderWidth: 3,
+    borderRadius: 10,
     padding: 0,
     borderColor: '#461177',
     shadowColor: '#3D0E61',
@@ -199,26 +208,34 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     fontSize: 24,
-    color: '#fff',
+    color: '#273746',
+    fontFamily: 'Helvetica',
+
   },
   text: {
     fontSize: 18,
     fontWeight: 'bold',
     margin: 10,
     padding: 10,
-    color: '#fff',
+    color: '#273746',
+    fontFamily: 'Helvetica',
+
   },
   headText: {
     fontSize: 24,
-    color: '#3D0E61',
+    color: '#273746',
     fontWeight: 'bold',
     padding: 10,
+    fontFamily: 'Helveticas',
+
   },
   headSmallText: {
     fontSize: 16,
-    color: '#3D0E61',
+    color: '#79A8D8',
     fontWeight: 'bold',
     padding: 8,
+    fontFamily: 'Helvetica',
+
   },
 });
 
