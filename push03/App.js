@@ -9,11 +9,14 @@
  * validation accuracy achived: 90%
  */
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {Dimensions, StyleSheet, Text, TouchableOpacity, Platform, View, Image} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import ImagePicker from 'react-native-image-picker';
 import Tflite from 'tflite-react-native';
+import {RNCamera} from 'react-native-camera';
+
+
 
 let tflite = new Tflite();
 var modelFile = 'models/densenet201_model_run47.tflite';
@@ -22,13 +25,34 @@ var labelsFile = 'models/gng_labels.txt';
 function App() {
   const [recognition, setRecognition] = useState(null);
   const [source, setSource] = useState();
+  const [camera, setCamera] = useState();
+  const [open, setOpen] = useState(false);
+  const [score, setScore] = useState(0);
+  const [grades, setGrades] = useState([]);
 
+  function updateScore(s) {
+    let temp = parseInt(score);
+    temp += parseInt(s);
+    setScore(temp);
+    const tempg = grades;
+    tempg.push(parseInt(s));
+    setGrades(tempg);
+    console.log(tempg, 'max index val:', tempg.indexOf(Math.max(...tempg)))
+  }
   function runModel(path) {
     tflite.runModelOnImage(
       {path: path}, (err, ress) => {
         if (err) {console.log(err);}
         else {
           console.log(ress);
+
+          console.log(ress[0]['confidence'], ress[0].index);
+          if (ress[0].index == 0) {
+            updateScore((ress[0].confidence * 100).toFixed(0));
+          }
+          else
+            updateScore(0)
+          console.log((ress[0].confidence * 100).toFixed(0))
           setRecognition(ress);
         }
       });
@@ -63,6 +87,13 @@ function App() {
       }
     });
   }
+  async function takePic() {
+    const data = [];
+    const options = {fixOrientation: true, quality: 0.5, writeExif: false};
+    let path = (await camera.takePictureAsync(options)).uri;
+    runModel(path)
+  }
+
 
   useEffect(() => {
     tflite.loadModel(
@@ -89,10 +120,13 @@ function App() {
             {recognition.length === 1 ?
               <View style={styles.reconV}>
                 <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
+                <Text style={styles.reconText}>Score - {score}</Text>
               </View>
               :
               <View>
                 <View style={styles.reconV}>
+                  <Text style={styles.reconText}>Score - {score}</Text>
+
                   <Text style={styles.text}>1st peak:</Text>
                   <Text style={styles.reconText}>{recognition[0].label + ' - ' + (recognition[0].confidence * 100).toFixed(0) + '%'}</Text>
                 </View>
@@ -112,6 +146,34 @@ function App() {
             }
           </View> : <View />
       }
+      {
+        open ?
+          <RNCamera
+            ref={(ref) => setCamera(ref)}
+            captureAudio={false}
+            style={{
+              flex: 1,
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+            type={RNCamera.Constants.Type.back}
+            flashMode={RNCamera.Constants.FlashMode.on}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+              forceUpOrientation: true,
+            }} ><View style={styles.buttons}>
+              <TouchableOpacity
+                style={[styles.snap, styles.button]}
+                onPress={() => takePic()}>
+                <Text>click</Text>
+              </TouchableOpacity>
+            </View></RNCamera>
+          :
+          null
+      }
       <View style={{flexDirection: 'row'}}>
         <TouchableOpacity onPress={() => selectGallaryImage()}>
           <View style={styles.button}>
@@ -124,6 +186,11 @@ function App() {
           </View>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={() => setOpen(!open)}>
+        <View style={styles.button}>
+          <Text style={styles.WT}>Premission</Text>
+        </View>
+      </TouchableOpacity>
     </View >
   );
 }

@@ -16,6 +16,8 @@ target 'push03' do
 
   pod 'TfliteReactNative', :path => '../node_modules/tflite-react-native'
 
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   target 'push03Tests' do
     inherit! :complete
     # Pods for testing
