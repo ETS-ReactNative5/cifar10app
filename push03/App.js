@@ -15,12 +15,12 @@ import LinearGradient from 'react-native-linear-gradient';
 import ImagePicker from 'react-native-image-picker';
 import Tflite from 'tflite-react-native';
 import {RNCamera} from 'react-native-camera';
-
+import Notifications from './noti'
 
 
 let tflite = new Tflite();
-var modelFile = 'models/densenet201_model_run47.tflite';
-var labelsFile = 'models/gng_labels.txt';
+var modelFile = 'models/CIFAR10_model.tflite';
+var labelsFile = 'models/CIFAR_labels.txt';
 
 function App() {
   const [recognition, setRecognition] = useState(null);
@@ -186,7 +186,7 @@ function App() {
           </View>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={() => setOpen(!open)}>
+      <TouchableOpacity onPress={() => Notifications()}>
         <View style={styles.button}>
           <Text style={styles.WT}>Premission</Text>
         </View>
